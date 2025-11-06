@@ -5,32 +5,29 @@
 
 🧾 Project Description
 
-The Expense Tracker Web Application is a cloud-hosted platform that helps users efficiently manage their daily and monthly expenses.
-It allows users to register, log in, add, view, and manage expenses, while also visualizing monthly spending trends through an interactive dashboard.
+The Expense Tracker Web Application is a cloud-hosted platform that allows users to manage personal finances effectively.
+It lets users register, log in, add expenses, view monthly reports, and access a dashboard that displays recent transactions and spending trends using Chart.js.
 
-The system is developed using Node.js and Express.js for the backend, and EJS, Bootstrap, CSS, and JavaScript for the frontend.
-All data is stored securely in AWS RDS (MySQL), and the application is deployed on AWS EC2 for high availability.
-Additionally, AWS CloudWatch is used to monitor instance performance and ensure system reliability.
+The app is built using Node.js (Express.js) for the backend, EJS, CSS, Bootstrap, and JavaScript for the frontend, and MySQL hosted on AWS RDS for persistent storage.
+It is deployed on AWS EC2, with AWS CloudWatch used for performance monitoring and instance health tracking.
 
 🎯 Project Outcome
 
-Developed a full-stack Expense Tracker with authentication, data management, and analytics.
+Successfully developed and deployed a full-stack Expense Tracker web app on AWS Cloud.
 
-Deployed successfully on AWS Cloud using EC2 for hosting and RDS for database management.
+Achieved seamless integration between EC2 (Node.js backend) and RDS (MySQL database).
 
-Integrated AWS CloudWatch to track instance health (CPU, disk, network).
+Implemented monitoring using AWS CloudWatch for continuous tracking of EC2 metrics.
 
-Provided interactive charts for monthly expense visualization using Chart.js.
-
-Implemented a secure and user-friendly dashboard to manage all financial activities.
+Demonstrated a scalable, reliable, and secure architecture using multiple AWS services.
 
 🧠 Key Features
 
-✅ User Registration & Login
+✅ User Registration and Login (secure authentication using bcrypt)
 ✅ Add, Edit, and Delete Expenses
-✅ Dashboard showing recent expenses
-✅ Monthly Reports with Chart.js visualization
-✅ AWS Cloud deployment using EC2, RDS, and CloudWatch
+✅ Dashboard showing recent transactions
+✅ Monthly reports with category-wise charts (Chart.js)
+✅ Cloud deployment using AWS EC2, RDS, and CloudWatch
 
 🧰 Key Technologies Used
 Category	Technologies
@@ -55,24 +52,86 @@ Database (MySQL) → Hosted on AWS RDS
    ▼
 Monitoring → AWS CloudWatch
 
-⚙️ Project Setup & Deployment
-🔹 Phase 1: Development
+⚙️ How to Run This Project on AWS
 
-Designed frontend using EJS templates, CSS, and Bootstrap.
+This section guides you through deploying the Expense Tracker Web App on AWS step-by-step.
 
-Built backend APIs using Node.js and Express.js.
+🔹 Step 1: Launch an AWS EC2 Instance
 
-Created MySQL database schema with users and expenses tables.
+Go to the AWS Management Console → EC2 → Launch Instance.
 
-🔹 Phase 2: AWS Setup
+Configure:
 
-EC2 Instance – Launch Ubuntu EC2 instance, install Node.js, clone repo, run app.
+AMI: Ubuntu Server 22.04 LTS (Free Tier)
 
-RDS MySQL Database – Create and connect using endpoint credentials.
+Instance Type: t2.micro
 
-CloudWatch – Monitor EC2 metrics and set alarms.
+Key Pair: Create or use an existing .pem key
 
-📊 Database Schema
+Security Group: Allow inbound rules for
+
+Port 22 (SSH)
+
+Port 80 (HTTP)
+
+Port 3000 (Node.js App)
+
+Click Launch Instance.
+
+Once running, note the Public IPv4 DNS of your instance.
+
+🔹 Step 2: Connect to Your EC2 Instance
+
+Open your terminal or PowerShell:
+
+cd path/to/your-key.pem
+ssh -i "expense_tracker-key.pem" ubuntu@<EC2-Public-DNS>
+
+🔹 Step 3: Install Node.js and npm
+
+Inside your EC2 instance:
+
+sudo apt update
+sudo apt install nodejs -y
+sudo apt install npm -y
+node -v
+npm -v
+
+🔹 Step 4: Clone Your GitHub Repository
+git clone https://github.com/mugeshwaran954/Expense-Tracker.git
+cd Expense-Tracker
+npm install
+
+🔹 Step 5: Set Up AWS RDS (MySQL Database)
+
+Go to AWS Console → RDS → Create Database.
+
+Select:
+
+Engine: MySQL
+
+Template: Free Tier
+
+DB Instance ID: expense-tracker-db
+
+Username: admin
+
+Password: (your choice)
+
+Enable Public Access (temporarily).
+
+After creation, copy your RDS Endpoint.
+
+Connect to your RDS instance from EC2:
+
+mysql -h <rds-endpoint> -u admin -p
+
+
+Create your database and tables:
+
+CREATE DATABASE expense_tracker;
+USE expense_tracker;
+
 CREATE TABLE users (
   id INT AUTO_INCREMENT PRIMARY KEY,
   username VARCHAR(100) NOT NULL,
@@ -90,43 +149,78 @@ CREATE TABLE expenses (
   FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-🚀 How to Run Locally
-git clone https://github.com/mugeshwaran954/Expense-Tracker.git
-cd Expense-Tracker
-npm install
+🔹 Step 6: Connect EC2 App to RDS
+
+Edit config/db.js in your project:
+
+const mysql = require('mysql2');
+const connection = mysql.createConnection({
+  host: '<your-rds-endpoint>',
+  user: 'admin',
+  password: '<your-password>',
+  database: 'expense_tracker'
+});
+connection.connect(err => {
+  if (err) throw err;
+  console.log('Connected to AWS RDS');
+});
+module.exports = connection;
+
+🔹 Step 7: Run Your Application
+
+On EC2 terminal:
+
 node server.js
 
 
-Visit: http://localhost:3000
+✅ You should see:
+Connected to AWS RDS
+Server running on port 3000
 
-🧩 AWS Verification
+Access your live app at:
 
-✅ Data stored in AWS RDS
+http://<EC2-Public-DNS>:3000
 
-✅ Backend hosted on AWS EC2
+🔹 Step 8: Monitor Instance with CloudWatch
 
-✅ Instance monitored using CloudWatch
+Go to AWS Console → CloudWatch → Metrics → EC2.
 
+View CPU utilization, memory, and network activity.
+
+(Optional) Create an alarm for high CPU usage:
+
+Condition: CPU > 80% for 5 minutes
+
+Notification: via SNS or email
+
+🔹 Step 9: Verify Data Storage
+
+To confirm your data is being stored in AWS RDS:
+
+mysql -h <rds-endpoint> -u admin -p
+USE expense_tracker;
+SELECT * FROM expenses;
+
+
+You’ll see the data you entered through the web app.
+
+🧩 AWS Services Used
+AWS Service	Purpose
+EC2	Host the Node.js backend
+RDS (MySQL)	Store users and expense data
+CloudWatch	Monitor EC2 instance performance and uptime
 🧾 Result
 
-The Expense Tracker Web App was successfully developed and deployed on AWS Cloud.
-It ensures secure authentication, efficient expense management, and visual financial insights for users.
-By leveraging EC2, RDS, and CloudWatch, the project achieves scalability, security, and continuous monitoring.
-
-📸 Screenshots
-
-<img width="975" height="458" alt="image" src="https://github.com/user-attachments/assets/b1779431-0468-4490-be16-4c07eb336fcc" />
-<img width="975" height="336" alt="image" src="https://github.com/user-attachments/assets/0e5285ec-0eb4-4fef-a908-8a76e3126ad2" />
-<img width="975" height="555" alt="image" src="https://github.com/user-attachments/assets/6c4f3cd9-602d-4fbc-be70-54b3ea205024" />
-
-
+The Expense Tracker Web App was successfully developed and deployed on AWS.
+It allows users to track, visualize, and manage expenses securely and efficiently using AWS cloud infrastructure.
+EC2 handles hosting, RDS manages storage, and CloudWatch ensures continuous system monitoring.
 
 🔗 Future Enhancements
 
-AWS SES for email alerts
+Integrate AWS S3 for uploading expense receipts.
 
-AWS S3 for storing receipts
+Add AWS SES for monthly report emails.
 
-Multi-user budget sharing
+Implement multi-user analytics dashboards.
 
-Dark/Light mode UI
+Add budget alerts and AI-based spending predictions.
